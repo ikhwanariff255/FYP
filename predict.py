@@ -1,26 +1,36 @@
 import sys
-import joblib
-import pandas as pd
+import pickle
+import numpy as np
+import os
 
-# Ambil argumen input dari Laravel: [temperature, ph, turbidity]
-if len(sys.argv) < 4:
-    print("Error: Input tidak mencukupi")
+try:
+    temp = float(sys.argv[1])
+    ph = float(sys.argv[2])
+    turb = float(sys.argv[3])
+except Exception as e:
+    print(f"Error_Input|0.0")
     sys.exit(1)
 
-temp = float(sys.argv[1])
-ph = float(sys.argv[2])
-turbidity = float(sys.argv[3])
+try:
+    # 1. Dapatkan laluan (path) sebenar folder tempat predict.py ini berada
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 2. Cantumkan secara dinamik dengan nama fail .pkl
+    classifier_path = os.path.join(current_dir, 'rf_classifier_model.pkl')
+    regressor_path = os.path.join(current_dir, 'rf_regressor_model.pkl')
 
-# Muat turun model .pkl yang telah kita latih tadi
-clf = joblib.load('rf_classifier_model.pkl')
-reg = joblib.load('rf_regressor_model.pkl')
+    # 3. Muat turun model menggunakan laluan mutlak tersebut
+    classifier_model = pickle.load(open(classifier_path, 'rb'))
+    regressor_model = pickle.load(open(regressor_path, 'rb'))
 
-# Format data untuk ramalan
-X_new = pd.DataFrame([[temp, ph, turbidity]], columns=['Temperature (°C)', 'pH', 'Turbidity (NTU)'])
+    input_data = np.array([[temp, ph, turb]])
 
-# Lakukan ramalan
-predicted_risk = clf.predict(X_new)[0]
-predicted_weight = reg.predict(X_new)[0]
+    predicted_risk = classifier_model.predict(input_data)[0]
+    predicted_weight = regressor_model.predict(input_data)[0]
 
-# Paparkan hasil dalam bentuk format yang mudah dibaca oleh PHP (Cth: Status|Berat)
-print(f"{predicted_risk}|{round(predicted_weight, 2)}")
+    # Cetak hasil ramalan AI tulen
+    print(f"{predicted_risk}|{predicted_weight}", end="")
+
+except Exception as e:
+    # TUKAR INI: Jika ralat, ia akan cetak punca ralat supaya kau nampak di sistem!
+    print(f"Error_Python: {str(e)}|50.0")

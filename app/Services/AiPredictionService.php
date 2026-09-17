@@ -3,15 +3,30 @@
 namespace App\Services;
 
 use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Log;
 
 class AiPredictionService
 {
     public function predict(float $temperature, float $ph, float $turbidity): ?array
     {
-        $process = new Process(['python', base_path('predict.py'), $temperature, $ph, $turbidity]);
+        $pythonPath = 'C:\laragon\bin\python\python-3.10\python.exe';
+        
+        // KUNCI PENYELESAIAN: Tambah 'SystemRoot' ke dalam environment variables
+       $process = new Process(
+            [$pythonPath, base_path('predict.py'), $temperature, $ph, $turbidity],
+            null,
+            [
+                'SystemRoot' => 'C:\Windows',
+                'PATH' => getenv('PATH'),
+                'USERPROFILE' => getenv('USERPROFILE'),
+                'LOCALAPPDATA' => getenv('LOCALAPPDATA')
+            ] 
+        );
+        
         $process->run();
 
         if (!$process->isSuccessful()) {
+            Log::error('AI Process Failed: ' . $process->getErrorOutput());
             return null;
         }
 
@@ -25,6 +40,7 @@ class AiPredictionService
             ];
         }
 
+        Log::error('AI Output Format Error: ' . $output);
         return null;
     }
 }
