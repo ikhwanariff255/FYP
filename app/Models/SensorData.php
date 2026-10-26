@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\AiPredictionService;
-use App\Models\AiAnalysis;
+// use App\Services\AiPredictionService;
+// use App\Models\AiAnalysis;
 
 class SensorData extends Model
 {
@@ -30,28 +30,34 @@ class SensorData extends Model
     }
 
     // Automatik jalankan AI prediction setiap kali data sensor baru dicipta
-    protected static function booted()
-    {
-        static::created(function ($sensorData) {
-            try {
-                $aiService = new AiPredictionService();
-                $result = $aiService->predict(
-                    (float)$sensorData->temperature, 
-                    (float)$sensorData->ph_level, 
-                    (float)$sensorData->turbidity
-                );
+    // protected static function booted()
+    // {
+    //     static::created(function ($sensorData) {
+    //         try {
+    //             $aiService = new AiPredictionService();
+                
+    //             // Ambil data device (kolam) yang berkaitan dengan sensor ini
+    //             $device = $sensorData->device;
 
-                if ($result) {
-                    AiAnalysis::create([
-                        'data_id' => $sensorData->data_id,
-                        'risk_status' => $result['risk_status'],
-                        'estimated_weight' => $result['estimated_weight'],
-                        'created_at' => now(),
-                    ]);
-                }
-            } catch (\Exception $e) {
-                // Abaikan jika berlaku ralat masa belakang supaya data sensor tetap tersimpan
-            }
-        });
-    }
+    //             // Hantar 4 parameter yang diperlukan oleh AiPredictionService
+    //             $result = $aiService->predict(
+    //                 (float)$sensorData->temperature, 
+    //                 (float)$sensorData->ph_level, 
+    //                 (float)$sensorData->turbidity,
+    //                 $device // <-- Tambah parameter ke-4 di sini
+    //             );
+
+    //             if ($result) {
+    //                 AiAnalysis::create([
+    //                     'data_id' => $sensorData->data_id,
+    //                     'risk_status' => $result['risk_status'],
+    //                     'estimated_weight' => $result['estimated_weight'],
+    //                     'created_at' => now(),
+    //                 ]);
+    //             }
+    //         } catch (\Exception $e) {
+    //             // Abaikan jika berlaku ralat supaya data sensor tetap tersimpan
+    //         }
+    //     });
+    // }
 }

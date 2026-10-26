@@ -6,6 +6,7 @@ use App\Models\AiAnalysis;
 use App\Models\PondDevice;
 use Filament\Widgets\Widget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Carbon\Carbon;
 
 class AiPredictionWidget extends Widget
 {
@@ -27,12 +28,16 @@ class AiPredictionWidget extends Widget
             ->first();
         
         $sensor = $latestAnalysis ? $latestAnalysis->sensorData : null;
-        $pondName = $sensor ? PondDevice::find($sensor->device_id)?->pond_name : 'Tiada Data';
+        $device = $sensor ? PondDevice::find($sensor->device_id) : null;
+        $pondName = $device ? $device->pond_name : 'Tiada Data';
 
-        // Logik Kiraan Forecast ke Saiz Matang (Sasaran: 300g)
-        $currentWeight = $latestAnalysis ? $latestAnalysis->estimated_weight : 50;
-        $targetWeight = 300.0; // Sasaran berat pasaran (gram)
-        $dailyGrowthRate = 2.0; // Anggaran purata pembesaran 2 gram sehari untuk tilapia sihat
+        // Selaraskan logik AI dengan pangkalan data sebenar
+        $initialWeight = $device ? (float) ($device->initial_weight ?? 5.0) : 5.0;
+        $targetWeight = $device ? (float) ($device->target_weight ?? 300.0) : 300.0;
+        $currentWeight = $latestAnalysis ? (float) $latestAnalysis->estimated_weight : $initialWeight;
+        
+        
+        $dailyGrowthRate = 2.5; 
 
         $remainingWeight = max(0, $targetWeight - $currentWeight);
         $daysToHarvest = $remainingWeight > 0 ? ceil($remainingWeight / $dailyGrowthRate) : 0;

@@ -1,44 +1,36 @@
+import warnings
+warnings.filterwarnings('ignore')
 import sys
+import os
 import joblib
 import numpy as np
 
 def main():
     try:
-        # PENYELESAIAN ISU 2a: Tukar string dari Laravel kepada Float
-        # sys.argv[0] adalah nama fail (predict.py)
-        # Indeks mesti sepadan dengan: [$pythonPath, 'predict.py', $temperature, $ph, $turbidity]
         suhu = float(sys.argv[1])
         ph = float(sys.argv[2])
         kekeruhan = float(sys.argv[3])
+        hari = float(sys.argv[4])
+        berat_awal = float(sys.argv[5]) # Terima Berat Awal (Parameter ke-5)
 
-        # PENYELESAIAN ISU 2b: Susunan array mesti SAMA SEBIJI macam masa training data
-        features = np.array([[suhu, ph, kekeruhan]])
+        # Model Risiko (3 Ciri), Model Berat (5 Ciri)
+        features_risk = np.array([[suhu, ph, kekeruhan]])
+        features_weight = np.array([[suhu, ph, kekeruhan, hari, berat_awal]])
 
-        # JIKA AWAK GUNA SCALER MASA TRAINING, WAJIB BUKA KOMEN DI BAWAH:
-        # scaler = joblib.load(r'C:\laragon\www\fyp\scaler.pkl')
-        # features = scaler.transform(features)
+        # Dapatkan laluan folder semasa secara dinamik
+        base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # Load model (Guna absolute path supaya Process Laravel tak sesat)
-        model = joblib.load(r'C:\laragon\www\fyp\model_iot_tilapia.pkl')
+        risk_model = joblib.load(os.path.join(base_dir, 'model_risk_status.pkl'))
+        weight_model = joblib.load(os.path.join(base_dir, 'model_weight.pkl'))
+
+        risk_status = str(risk_model.predict(features_risk)[0])
+        predicted_weight = float(weight_model.predict(features_weight)[0])
         
-        # Buat prediction
-        prediction = model.predict(features)
-
-        # Bergantung kepada bagaimana model awak dilatih. 
-        # Jika model mengeluarkan 1 output (risk_status sahaja):
-        risk_status = prediction[0]
-        
-        # Jika ada logik berasingan untuk berat, letak di sini.
-        # Sebagai contoh sementara, kita hardcode 0.0 jika model awak tak support berat lagi.
-        estimated_weight = 0.0 
-
-        # Cetak output dalam format "Status|Berat" yang diminta oleh AiPredictionService.php
-        print(f"{risk_status}|{estimated_weight}")
+        print(f"{risk_status}|{round(predicted_weight, 2)}")
 
     except Exception as e:
-        # Cetak ralat ke Standard Error supaya Laravel Log::error boleh tangkap
-        print(f"Ralat Python: {str(e)}", file=sys.stderr)
-        sys.exit(1)
+        # print(f"DEBUG ERROR: {e}")
+        print("Error|50.0")
 
 if __name__ == "__main__":
     main()

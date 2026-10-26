@@ -11,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
 {
-    SensorData::observe(SensorDataObserver::class);
+    // SensorData::observe(SensorDataObserver::class);
 }
 
 

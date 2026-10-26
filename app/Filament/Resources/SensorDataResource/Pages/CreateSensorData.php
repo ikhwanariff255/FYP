@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\SensorDataResource\Pages;
 
 use App\Filament\Resources\SensorDataResource;
+use App\Models\AiAnalysis;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\AiAnalysis;
+use Symfony\Component\Process\Process;
+use Carbon\Carbon;
 
 class CreateSensorData extends CreateRecord
 {
@@ -20,40 +22,61 @@ class CreateSensorData extends CreateRecord
         $turb = $data['turbidity'];
         $recordedTimestamp = $data['timestamp'] ?? now();
 
-        // Guna laluan penuh python jika perlu, cth: 'C:\Python39\python.exe' atau 'python'
-        $pythonPath = 'python'; 
-        $scriptPath = base_path('python/predict.py');
-
-        // Jalankan perintah terminal dan tangkap output AI
-        $command = escapeshellcmd("$pythonPath \"$scriptPath\" $temp $ph $turb");
-        $aiOutput = trim(shell_exec($command) ?? '');
-
-        // Pecahkan hasil output AI (Format: Status|Berat)
-        $parts = explode('|', $aiOutput);
+        // 1. Dapatkan Maklumat Kolam
+        $device = $sensorData->device;
+        $initialWeight = (float) ($device->initial_weight ?? 5.0); // Tarik berat awal kolam
         
-        // STATUS RISIKO DIJANA 100% OLEH AI MODEL .pkl
-        $riskStatus = !empty($parts[0]) ? trim($parts[0]) : 'Stable';
-        $rawPredictedWeight = isset($parts[1]) ? floatval($parts[1]) : 50.0;
+        $stockingDate = $device->stocking_date ? Carbon::parse($device->stocking_date) : Carbon::now();
+        $recordedDate = Carbon::parse($recordedTimestamp);
+        
+        // 2. Kira Umur Ikan (Berdasarkan tarikh rekod dimasukkan)
+        $daysInCulture = max(1, $stockingDate->diffInDays($recordedDate));
 
-        // Logik Hibrid Berat (Hanya untuk kawal graf supaya tak melompat ke 280g)
-        $previousAnalysis = AiAnalysis::whereHas('sensorData', function($q) use ($data) {
-            $q->where('device_id', $data['device_id']);
-        })->latest('data_id')->first();
+        $pythonPath = 'C:\laragon\bin\python\python-3.10\python.exe'; 
+        $scriptPath = base_path('predict.py');
 
-        $previousWeight = $previousAnalysis ? $previousAnalysis->estimated_weight : 50.0;
+        // 3. Hantar 5 parameter ke Python!
+        $process = new Process([
+            $pythonPath, 
+            $scriptPath, 
+            (string)$temp, 
+            (string)$ph, 
+            (string)$turb, 
+            (string)$daysInCulture,
+            (string)$initialWeight // <-- Hantar Parameter Ke-5
+        ]);
+        
+        $process->setEnv([
+            'SYSTEMROOT' => getenv('SYSTEMROOT') ?: 'C:\Windows',
+            'TEMP' => getenv('TEMP') ?: 'C:\Windows\Temp',
+        ]);
+        
+        $process->run();
 
-        // Jika AI Classifier meramalkan 'At Risk', berat dikekalkan/stabil. Jika Stable, bertambah logik.
-        if ($riskStatus === 'At Risk' || $riskStatus === 'Critical') {
-            $finalEstimatedWeight = $previousWeight; 
-        } else {
-            $finalEstimatedWeight = $previousWeight + 1.5; 
+        $aiOutput = '';
+        if ($process->isSuccessful()) {
+            $aiOutput = trim($process->getOutput());
         }
 
-        // Simpan keputusan AI tulen ke pangkalan data
+        $lines = explode("\n", $aiOutput);
+        $cleanOutput = '';
+        foreach ($lines as $line) {
+            if (str_contains($line, '|')) {
+                $cleanOutput = trim($line);
+                break;
+            }
+        }
+
+        $parts = explode('|', $cleanOutput);
+        $riskStatus = !empty($parts[0]) && $parts[0] !== 'Error' ? trim($parts[0]) : 'Stable';
+        $estimatedWeight = isset($parts[1]) ? floatval($parts[1]) : $initialWeight; // Fallback ke berat awal
+
+        // 4. Simpan ke database
         AiAnalysis::create([
             'data_id' => $sensorData->getKey(),
             'risk_status' => $riskStatus,
-            'estimated_weight' => $finalEstimatedWeight,
+            'estimated_weight' => $estimatedWeight,
+            'days_in_culture' => $daysInCulture,
             'created_at' => $recordedTimestamp,
             'updated_at' => $recordedTimestamp,
         ]);

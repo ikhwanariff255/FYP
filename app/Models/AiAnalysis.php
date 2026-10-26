@@ -17,6 +17,7 @@ class AiAnalysis extends Model
         'data_id',
         'risk_status',
         'estimated_weight',
+        'days_in_culture',
         'created_at',
     ];
 

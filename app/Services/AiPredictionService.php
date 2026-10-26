@@ -2,45 +2,14 @@
 
 namespace App\Services;
 
-use Symfony\Component\Process\Process;
-use Illuminate\Support\Facades\Log;
-
 class AiPredictionService
 {
-    public function predict(float $temperature, float $ph, float $turbidity): ?array
+    public function predict($temperature, $phLevel, $turbidity, $device)
     {
-        $pythonPath = 'C:\laragon\bin\python\python-3.10\python.exe';
-        
-        // KUNCI PENYELESAIAN: Tambah 'SystemRoot' ke dalam environment variables
-       $process = new Process(
-            [$pythonPath, base_path('predict.py'), $temperature, $ph, $turbidity],
-            null,
-            [
-                'SystemRoot' => 'C:\Windows',
-                'PATH' => getenv('PATH'),
-                'USERPROFILE' => getenv('USERPROFILE'),
-                'LOCALAPPDATA' => getenv('LOCALAPPDATA')
-            ] 
-        );
-        
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            Log::error('AI Process Failed: ' . $process->getErrorOutput());
-            return null;
-        }
-
-        $output = trim($process->getOutput());
-        $parts = explode('|', $output);
-
-        if (count($parts) === 2) {
-            return [
-                'risk_status' => $parts[0],
-                'estimated_weight' => (float)$parts[1],
-            ];
-        }
-
-        Log::error('AI Output Format Error: ' . $output);
-        return null;
+        // KITA PAKSA NILAI INI UNTUK UJI SAMA ADA FAIL INI BETUL-BETUL DIPANGGIL ATAU TIDAK
+        return [
+            'risk_status' => 'Stable',
+            'estimated_weight' => 99.99, // Jika masuk 99.99 dalam DB, maksudnya fail ini betul. Kalau masih 51.50, Laravel guna fail lain!
+        ];
     }
 }

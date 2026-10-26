@@ -15,8 +15,16 @@ class PondDevice extends Model
 
     protected $fillable = [
         'user_id',
-        'mac_address',
-        'pond_name',
+    'mac_address',
+    'pond_name',
+    'days_in_culture',
+    'stocking_date',
+    'stocking_density',
+    'initial_weight',
+    'target_weight',
+    'estimated_harvest_date',
+    'status',
+        
     ];
 
     public function user()
