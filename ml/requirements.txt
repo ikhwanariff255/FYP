@@ -1,0 +1,7 @@
+# Python packages for training (ml/train_models.py) and prediction (predict.py)
+numpy>=2.0
+scikit-learn==1.7.2   # must match the server so saved models load correctly
+joblib>=1.4
+matplotlib>=3.8
+# Notebook only
+jupyter

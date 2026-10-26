@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Amaran peranti luar talian (perlukan cron: * * * * * php artisan schedule:run)
+        $schedule->command('ponds:check-offline')->everyFiveMinutes()->withoutOverlapping();
     }
 
     /**

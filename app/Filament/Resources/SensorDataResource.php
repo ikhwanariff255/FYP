@@ -6,12 +6,17 @@ use App\Filament\Resources\SensorDataResource\Pages;
 use App\Models\SensorData;
 use Filament\Forms;
 use Filament\Forms\Form;
+use App\Filament\Concerns\AdminOnlyResource;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Enums\FiltersLayout;
 
 class SensorDataResource extends Resource
 {
+    use AdminOnlyResource;
+
     protected static ?string $model = SensorData::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
@@ -75,8 +80,13 @@ class SensorDataResource extends Resource
             ])
             ->defaultSort('timestamp', 'desc')
             ->filters([
-                //
-            ])
+                SelectFilter::make('device_id')
+                    ->relationship('device', 'pond_name')
+                    ->label('Pilih Kolam')
+                    ->placeholder('Semua Kolam')
+                    ->searchable()
+                    ->preload(),
+            ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

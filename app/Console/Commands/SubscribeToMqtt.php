@@ -8,6 +8,7 @@ use PhpMqtt\Client\MqttClient;
 use App\Models\SensorData;
 use App\Models\PondDevice;
 use App\Models\AiAnalysis;
+use App\Services\PondAlertService;
 use Symfony\Component\Process\Process;
 use Carbon\Carbon;
 
@@ -121,6 +122,13 @@ class SubscribeToMqtt extends Command
                         ]);
 
                         $this->info("SUCCESS: Sensor Data & AI Analysis saved! (data_id: {$sensorData->getKey()})");
+
+                        // 6. Amaran kepada penternak jika keadaan air berubah (tidak menghalang simpanan data)
+                        try {
+                            app(PondAlertService::class)->evaluate($device);
+                        } catch (\Throwable $e) {
+                            $this->error('ALERT ERROR: ' . $e->getMessage());
+                        }
 
                     } catch (\Throwable $e) {
                         $this->error("DB/AI ERROR: " . $e->getMessage());

@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class MaintenanceLogResource extends Resource
 {
@@ -22,14 +23,18 @@ class MaintenanceLogResource extends Resource
     {
         return $form
             ->schema([
+                // Penternak sentiasa direkod sebagai diri sendiri (lihat CreateMaintenanceLog)
                 Forms\Components\Select::make('user_id')
                     ->relationship('user', 'username')
                     ->required()
+                    ->visible(fn () => auth()->user()->isAdmin())
                     ->label('Farmer / User'),
                 Forms\Components\Select::make('device_id')
-                    ->relationship('device', 'pond_name')
+                    ->relationship('device', 'pond_name', fn (Builder $query) => $query
+                        ->whereIn('device_id', auth()->user()->visiblePonds()->pluck('device_id')))
+                    ->default(fn () => auth()->user()->visiblePonds()->value('device_id'))
                     ->required()
-                    ->label('Pond Device'),
+                    ->label('Pond'),
                 Forms\Components\Textarea::make('activity_desc')
                     ->required()
                     ->columnSpanFull()
@@ -77,6 +82,15 @@ class MaintenanceLogResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    // Penternak hanya nampak log untuk kolam miliknya
+    public static function getEloquentQuery(): Builder
+    {
+        $user = auth()->user();
+
+        return parent::getEloquentQuery()
+            ->unless($user->isAdmin(), fn ($q) => $q->whereIn('device_id', $user->visiblePonds()->pluck('device_id')));
     }
 
     public static function getPages(): array

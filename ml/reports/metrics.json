@@ -1,0 +1,336 @@
+{
+  "generated_at": "2026-10-26T13:24:33",
+  "sklearn": "1.7.2",
+  "excel": {
+    "raw_rows": 4383,
+    "unique_rows": 360
+  },
+  "classifier": {
+    "features": [
+      "temperature",
+      "ph_level",
+      "turbidity",
+      "temp_change_1h",
+      "ph_swing_24h"
+    ],
+    "classes": [
+      "Optimal",
+      "Warning",
+      "Critical"
+    ],
+    "dataset_rows": 6000,
+    "class_counts": {
+      "Optimal": 1799,
+      "Warning": 1548,
+      "Critical": 2653
+    },
+    "best_params": {
+      "max_depth": 16,
+      "min_samples_leaf": 3,
+      "n_estimators": 200
+    },
+    "cv_f1_macro": 0.9325,
+    "test": {
+      "accuracy": 0.925,
+      "precision_macro": 0.9152,
+      "recall_macro": 0.9195,
+      "f1_macro": 0.9166,
+      "per_class": {
+        "Optimal": {
+          "precision": 0.9395,
+          "recall": 0.9056,
+          "f1": 0.9222,
+          "support": 360
+        },
+        "Warning": {
+          "precision": 0.8254,
+          "recall": 0.9,
+          "f1": 0.8611,
+          "support": 310
+        },
+        "Critical": {
+          "precision": 0.9806,
+          "recall": 0.9528,
+          "f1": 0.9665,
+          "support": 530
+        }
+      },
+      "confusion_matrix": [
+        [
+          326,
+          34,
+          0
+        ],
+        [
+          21,
+          279,
+          10
+        ],
+        [
+          0,
+          25,
+          505
+        ]
+      ]
+    },
+    "baselines": {
+      "threshold_rule": {
+        "accuracy": 0.7775,
+        "precision_macro": 0.7901,
+        "recall_macro": 0.7699,
+        "f1_macro": 0.7596,
+        "per_class": {
+          "Optimal": {
+            "precision": 0.6322,
+            "recall": 0.9694,
+            "f1": 0.7654,
+            "support": 360
+          },
+          "Warning": {
+            "precision": 0.7479,
+            "recall": 0.5742,
+            "f1": 0.6496,
+            "support": 310
+          },
+          "Critical": {
+            "precision": 0.9902,
+            "recall": 0.766,
+            "f1": 0.8638,
+            "support": 530
+          }
+        },
+        "confusion_matrix": [
+          [
+            349,
+            11,
+            0
+          ],
+          [
+            128,
+            178,
+            4
+          ],
+          [
+            75,
+            49,
+            406
+          ]
+        ]
+      },
+      "svm": {
+        "accuracy": 0.9167,
+        "precision_macro": 0.9061,
+        "recall_macro": 0.9123,
+        "f1_macro": 0.9082,
+        "per_class": {
+          "Optimal": {
+            "precision": 0.9288,
+            "recall": 0.9056,
+            "f1": 0.917,
+            "support": 360
+          },
+          "Warning": {
+            "precision": 0.8052,
+            "recall": 0.8935,
+            "f1": 0.8471,
+            "support": 310
+          },
+          "Critical": {
+            "precision": 0.9842,
+            "recall": 0.9377,
+            "f1": 0.9604,
+            "support": 530
+          }
+        },
+        "confusion_matrix": [
+          [
+            326,
+            34,
+            0
+          ],
+          [
+            25,
+            277,
+            8
+          ],
+          [
+            0,
+            33,
+            497
+          ]
+        ]
+      }
+    },
+    "feature_importance": {
+      "temperature": 0.2771,
+      "ph_level": 0.3259,
+      "turbidity": 0.1126,
+      "temp_change_1h": 0.1305,
+      "ph_swing_24h": 0.1539
+    },
+    "permutation_importance": {
+      "temperature": 0.2474,
+      "ph_level": 0.2637,
+      "turbidity": 0.102,
+      "temp_change_1h": 0.0806,
+      "ph_swing_24h": 0.1245
+    },
+    "excel_validation": {
+      "rows": 360,
+      "predicted": {
+        "Optimal": 360,
+        "Warning": 0,
+        "Critical": 0
+      }
+    },
+    "test_cases": [
+      {
+        "name": "TC-03 acidic + very murky",
+        "input": {
+          "temperature": 29.0,
+          "ph_level": 4.8,
+          "turbidity": 180.0,
+          "temp_change_1h": 0.0,
+          "ph_swing_24h": 0.4
+        },
+        "expected": "Critical",
+        "predicted": "Critical",
+        "confidence": 0.992,
+        "pass": true
+      },
+      {
+        "name": "Ideal water",
+        "input": {
+          "temperature": 28.5,
+          "ph_level": 7.2,
+          "turbidity": 15.0,
+          "temp_change_1h": 0.2,
+          "ph_swing_24h": 0.3
+        },
+        "expected": "Optimal",
+        "predicted": "Optimal",
+        "confidence": 0.977,
+        "pass": true
+      },
+      {
+        "name": "Warm afternoon",
+        "input": {
+          "temperature": 33.0,
+          "ph_level": 7.6,
+          "turbidity": 20.0,
+          "temp_change_1h": 0.5,
+          "ph_swing_24h": 0.4
+        },
+        "expected": "Warning",
+        "predicted": "Warning",
+        "confidence": 0.903,
+        "pass": true
+      },
+      {
+        "name": "High pH + warm (toxic NH3)",
+        "input": {
+          "temperature": 31.0,
+          "ph_level": 8.9,
+          "turbidity": 20.0,
+          "temp_change_1h": 0.3,
+          "ph_swing_24h": 0.5
+        },
+        "expected": "Critical",
+        "predicted": "Critical",
+        "confidence": 0.981,
+        "pass": true
+      },
+      {
+        "name": "Thermal shock in range",
+        "input": {
+          "temperature": 28.0,
+          "ph_level": 7.3,
+          "turbidity": 15.0,
+          "temp_change_1h": 3.0,
+          "ph_swing_24h": 0.3
+        },
+        "expected": "Warning",
+        "predicted": "Warning",
+        "confidence": 0.852,
+        "pass": true
+      },
+      {
+        "name": "Cold spell",
+        "input": {
+          "temperature": 21.0,
+          "ph_level": 7.0,
+          "turbidity": 10.0,
+          "temp_change_1h": -1.0,
+          "ph_swing_24h": 0.3
+        },
+        "expected": "Critical",
+        "predicted": "Critical",
+        "confidence": 0.98,
+        "pass": true
+      }
+    ]
+  },
+  "regressor": {
+    "features": [
+      "initial_weight",
+      "days_in_culture",
+      "cum_degree_days",
+      "mean_temp_7d",
+      "mean_ph_7d",
+      "mean_turbidity_7d",
+      "pct_days_temp_optimal",
+      "pct_days_ph_optimal",
+      "pct_days_turbidity_optimal"
+    ],
+    "dataset_rows": 8280,
+    "batches": 500,
+    "best_params": {
+      "max_depth": 12,
+      "min_samples_leaf": 5,
+      "n_estimators": 100
+    },
+    "cv_rmse": 50.33,
+    "test": {
+      "mse": 1982.99,
+      "rmse": 44.53,
+      "mae": 25.26,
+      "r2": 0.9322
+    },
+    "baselines": {
+      "tgc_formula": {
+        "mse": 2590.38,
+        "rmse": 50.9,
+        "mae": 27.27,
+        "r2": 0.9115
+      },
+      "linear_regression": {
+        "mse": 4810.05,
+        "rmse": 69.35,
+        "mae": 51.27,
+        "r2": 0.8356
+      }
+    },
+    "feature_importance": {
+      "initial_weight": 0.1671,
+      "days_in_culture": 0.1354,
+      "cum_degree_days": 0.6693,
+      "mean_temp_7d": 0.0036,
+      "mean_ph_7d": 0.003,
+      "mean_turbidity_7d": 0.0039,
+      "pct_days_temp_optimal": 0.0088,
+      "pct_days_ph_optimal": 0.0046,
+      "pct_days_turbidity_optimal": 0.0042
+    },
+    "permutation_importance": {
+      "initial_weight": 0.3469,
+      "days_in_culture": 0.023,
+      "cum_degree_days": 1.304,
+      "mean_temp_7d": 0.0001,
+      "mean_ph_7d": -0.001,
+      "mean_turbidity_7d": 0.0013,
+      "pct_days_temp_optimal": 0.0067,
+      "pct_days_ph_optimal": -0.0001,
+      "pct_days_turbidity_optimal": 0.0029
+    }
+  }
+}

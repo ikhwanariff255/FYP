@@ -6,12 +6,15 @@ use App\Filament\Resources\AiAnalysisResource\Pages;
 use App\Models\AiAnalysis;
 use Filament\Forms;
 use Filament\Forms\Form;
+use App\Filament\Concerns\AdminOnlyResource;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class AiAnalysisResource extends Resource
 {
+    use AdminOnlyResource;
+
     protected static ?string $model = AiAnalysis::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cpu-chip';

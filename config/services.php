@@ -31,4 +31,10 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Amaran Telegram (bot dicipta melalui @BotFather)
+    'telegram' => [
+        'bot_token'    => env('TELEGRAM_BOT_TOKEN'),
+        'bot_username' => env('TELEGRAM_BOT_USERNAME', 'TilapiaCare_Alerts_Bot'),
+    ],
+
 ];

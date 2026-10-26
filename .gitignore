@@ -19,3 +19,8 @@ yarn-error.log
 /.vscode
 *.pkl
 /public/phpmyadmin
+
+# Trained ML models (regenerate with: python3 ml/train_models.py)
+/ml/models/
+*.joblib
+__pycache__/
