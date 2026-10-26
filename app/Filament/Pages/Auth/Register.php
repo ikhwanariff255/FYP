@@ -8,7 +8,6 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Auth\Register as BaseRegister;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Hash;
 
 class Register extends BaseRegister
 {
@@ -42,7 +41,8 @@ class Register extends BaseRegister
         return $this->getUserModel()::create([
             'username'  => $data['username'],
             'email'     => $data['email'],
-            'password'  => Hash::make($data['password']),
+            // Sudah di-hash oleh getPasswordFormComponent(); jangan hash dua kali
+            'password'  => $data['password'],
             'role'      => 'Customer',
             'device_id' => $device ? ($device->device_id ?? $device->id) : null,
         ]);
