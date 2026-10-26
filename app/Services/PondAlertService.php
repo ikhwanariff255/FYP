@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Filament\Pages\FishGrowthAnalysis;
+use App\Filament\Pages\Pond\RisksActions;
 use App\Models\PondDevice;
 use App\Models\User;
 use Filament\Notifications\Actions\Action;
@@ -85,7 +86,7 @@ class PondAlertService
                 ->title("{$device->pond_name}: {$top['title']}")
                 ->body("{$top['current']}. Do now: {$top['actions'][0]}" . ($extra > 0 ? " (+{$extra} more issue" . ($extra > 1 ? 's' : '') . ')' : ''));
 
-            $this->send($device, $level === 'critical' ? $notification->danger() : $notification->warning(), 'Open action plan');
+            $this->send($device, $level === 'critical' ? $notification->danger() : $notification->warning(), 'Open action plan', RisksActions::class);
 
             return;
         }
@@ -127,9 +128,9 @@ class PondAlertService
             ->get();
     }
 
-    protected function send(PondDevice $device, Notification $notification, string $actionLabel = 'Open pond'): void
+    protected function send(PondDevice $device, Notification $notification, string $actionLabel = 'Open pond', string $page = FishGrowthAnalysis::class): void
     {
-        $url = FishGrowthAnalysis::getUrl(['pond' => $device->device_id], panel: 'admin');
+        $url = $page::getUrl(['pond' => $device->device_id], panel: 'admin');
         $recipients = $this->recipients($device);
 
         $notification

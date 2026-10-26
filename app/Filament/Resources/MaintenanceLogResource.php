@@ -84,6 +84,17 @@ class MaintenanceLogResource extends Resource
             ]);
     }
 
+    // Untuk penternak, log diletakkan dalam kumpulan "My Pond" (selepas Overview…Risks)
+    public static function getNavigationGroup(): ?string
+    {
+        return auth()->user()?->isAdmin() ? null : 'My Pond';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return auth()->user()?->isAdmin() ? null : 5;
+    }
+
     // Penternak hanya nampak log untuk kolam miliknya
     public static function getEloquentQuery(): Builder
     {
